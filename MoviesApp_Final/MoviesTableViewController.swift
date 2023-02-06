@@ -34,8 +34,8 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
         tableView.dataSource = self
         dataManager.delegate = self
         
-        apiCaller.getTrendingMovies(page: apiCaller.pageNumber) { [weak self] movie in
-            self?.dataSource = movie
+        apiCaller.getTrendingMovies { [weak self] movies in
+            self?.dataSource = movies
         }
     }
     
@@ -58,9 +58,8 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
     }
     
     func loadMovies() {
-        apiCaller.getTrendingMovies(page: apiCaller.pageNumber) { [weak self] movies in
+        apiCaller.getTrendingMovies { [weak self] movies in
             self?.dataSource?.append(contentsOf: movies)
-            print("HEREEEEE\(movies)")
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
             }
@@ -70,11 +69,11 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        tableView.reloadData() //TODO: fix
+        tableView.reloadData()
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataSource?.count ?? 10
+        return dataSource?.count ?? 0
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -90,7 +89,7 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
         
         guard let posterPath = movie.posterPath else {
             return cell }
-        let currentURL = apiCaller.fetchImageURL(posterPath: posterPath)
+        let currentURL = apiCaller.getImageURL(posterPath: posterPath)
         cell.loadImage(from: currentURL) { success in
             
         }
@@ -152,6 +151,7 @@ extension MoviesTableViewController {
         if dataManager.isMovieAlreadySaved(with: cellMovieTitle!) {
             let movie = fetchedResultsController.object(at: indexPath)
             let removeFavoriteAction = UIContextualAction(style: .destructive, title: "") { [weak self] (action, view, completion) in
+                print("Currentmovie title \(movie.title)")
                 self?.dataManager.deleteFavourite(movie: movie)
                 self?.updateStarButton(for: tableView.cellForRow(at: indexPath) as! MovieTableViewCell)
                 completion(true)
@@ -161,18 +161,19 @@ extension MoviesTableViewController {
             
             tableView.reloadRows(at: [indexPath], with: .automatic)
             return UISwipeActionsConfiguration(actions: [removeFavoriteAction])
+        } else {
+            let favouriteAction = UIContextualAction(style: .normal, title: "") { [weak self] (action, view, completion) in
+                let image = self?.getLoadedImageFromCell(indexPath: indexPath)
+                self?.dataManager.saveFavourite(movieToSave: (self?.dataSource?[indexPath.row])!, image: image)
+                self?.updateStarButton(for: tableView.cellForRow(at: indexPath) as! MovieTableViewCell)
+                completion(true)
+            }
+            
+            favouriteAction.image = UIImage(systemName: "star")
+            favouriteAction.backgroundColor = .systemBlue
+            
+            return UISwipeActionsConfiguration(actions: [favouriteAction])
         }
-        let favouriteAction = UIContextualAction(style: .normal, title: "") { [weak self] (action, view, completion) in
-            let image = self?.getLoadedImageFromCell(indexPath: indexPath)
-            self?.dataManager.saveFavourite(movieToSave: (self?.dataSource?[indexPath.row])!, image: image)
-            self?.updateStarButton(for: tableView.cellForRow(at: indexPath) as! MovieTableViewCell)
-            completion(true)
-        }
-        
-        favouriteAction.image = UIImage(systemName: "star")
-        favouriteAction.backgroundColor = .systemBlue
-        
-        return UISwipeActionsConfiguration(actions: [favouriteAction])
     }
 }
 
@@ -185,7 +186,7 @@ extension MoviesTableViewController {
         
         tableView.tableFooterView = createSpinnerFooter()
         
-        apiCaller.getTrendingMovies(page: apiCaller.pageNumber) { [weak self] movies in
+        apiCaller.getTrendingMovies { [weak self] movies in
             self?.dataSource?.append(contentsOf: movies)
             
             DispatchQueue.main.async {
@@ -217,11 +218,7 @@ extension MoviesTableViewController {
 extension MoviesTableViewController {
     
     func updateStarButton(for cell: MovieTableViewCell) {
-        if dataManager.isMovieAlreadySaved(with: cell.movieModel!.title) {
-            cell.starButton?.isHidden = false
-        } else {
-            cell.starButton?.isHidden = true
-        }
+        cell.starButton?.isHidden = !dataManager.isMovieAlreadySaved(with: cell.movieModel!.title)
     }
 }
 

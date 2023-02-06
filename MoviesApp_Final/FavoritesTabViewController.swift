@@ -161,7 +161,7 @@ extension FavoritesTableViewController {
     private func createSortButton() -> UIButton {
         let sortButton = UIButton()
         sortButton.showsMenuAsPrimaryAction = true
-        sortButton.menu = filterMenu.fulleMenu
+        sortButton.menu = filterMenu.fullMenu
         sortButton.addAction(sortButtonAction(), for: .menuActionTriggered)
         sortButton.setImage(UIImage(systemName: "arrow.up.arrow.down"), for: .normal)
         return sortButton
@@ -170,8 +170,6 @@ extension FavoritesTableViewController {
     private func sortButtonAction() -> UIAction {
         return UIAction(title: "") { _ in
         }
-    }
-    func didDismissMenu() {
     }
     
     private func reloadSorted(sort: NSSortDescriptor) {
@@ -189,7 +187,7 @@ extension FavoritesTableViewController {
     }
     
     func filteringIsChosen(type: FilterOption) {
-        selectedOptions.1 = type.state
+        selectedOptions.1 = type.isAscending
     }
 }
 

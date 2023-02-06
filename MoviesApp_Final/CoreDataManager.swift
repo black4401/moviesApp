@@ -28,8 +28,7 @@ class CoreDataManager {
         
         do {
             entitiesCount = try persistentContainer.viewContext.count(for: fetchRequest)
-        }
-        catch {
+        } catch {
             print("error executing fetch request: \(error)")
         }
         
@@ -53,19 +52,24 @@ class CoreDataManager {
         do {
             try context.save()
             delegate?.handleSuccessfulSave()
+            print("Successfully saved \(movie.title!)")
         } catch {
             delegate?.handleUnsuccessfulSave(title: movieToSave.title)
+            print("Failed to save \(movie.title!)")
         }
     }
     
     func deleteFavourite(movie: Movie) {
         let context = persistentContainer.viewContext
+        let movieTitle = movie.title
         context.delete(movie)
         do {
             try context.save()
             delegate?.handleSuccessfulSave()
+            print("Successfully deleted \(movieTitle)")
         } catch {
             delegate?.handleUnsuccessfulSave(title: movie.title!)
+            print("Not able to delete \(movieTitle)")
         }
     }
 }

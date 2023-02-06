@@ -33,8 +33,11 @@ class MovieTableViewCell: UITableViewCell {
         }
     }
     
-    func getImage() -> UIImage {
-        (movieImageView?.image)!
+    func getImage() -> UIImage? {
+        if let image = movieImageView?.image {
+            return image
+        }
+       return nil
     }
     
     override func prepareForReuse() {
