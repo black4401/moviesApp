@@ -38,6 +38,7 @@ class MovieImageView: UIImageView {
                     DispatchQueue.main.async {
                         self?.activityIndicator.stopAnimating()
                     }
+                    completion(false)
                     return
                 }
                 guard self?.url == url else { return }

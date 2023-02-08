@@ -9,9 +9,8 @@ import Foundation
 
 class APICaller {
     
-    private let apiKey = "b9154cb727a3792889b9d7c73195411f"
-    private let baseURL = "https://api.themoviedb.org"
-    private var pageNumber = 1
+    let apiKey = "b9154cb727a3792889b9d7c73195411f"
+    var pageNumber = 1
     
     func fetchMoviesURL(page: Int) -> URL {
         var components = URLComponents()
@@ -26,7 +25,7 @@ class APICaller {
         return components.url!
     }
     
-    func getImageURL(posterPath: String) -> URL {
+    func fetchImageURL(posterPath: String) -> URL {
         var components = URLComponents()
         components.scheme = "https"
         components.host = "image.tmdb.org"
@@ -34,11 +33,11 @@ class APICaller {
         return components.url!
     }
     
-    func getTrendingMovies(success: @escaping ([MovieModel]) -> Void) {
+    func getTrendingMovies(page: Int, success: @escaping ([MovieModel]) -> Void) {
         
         pageNumber += 1
         let session = URLSession(configuration: .default)
-        session.fetchData(for: fetchMoviesURL(page: pageNumber)) {(result: Result<Page, Error>) in
+        session.fetchData(for: fetchMoviesURL(page: page)) {(result: Result<Page, Error>) in
             
             switch result {
                 case .success(let page):
@@ -47,7 +46,7 @@ class APICaller {
                     }
                     success(movies)
                 case .failure(let error):
-                    print("Fetch data not successful!")
+                    print(error)
             }
             
         }

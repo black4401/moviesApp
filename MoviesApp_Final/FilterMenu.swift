@@ -29,7 +29,7 @@ enum FilterOption: CaseIterable {
     case ascending
     case descending
     
-    var isAscending: Bool {
+    var state: Bool {
         switch self {
         case .ascending:
             return true
@@ -56,19 +56,19 @@ protocol FilterMenuDelegate: AnyObject {
 class FilterMenu: UIMenu {
     var sortByOptionElement: UIMenuElement?
     var orderByOption: UIMenuElement?
-    var fullMenu: UIMenu?
+    var fulleMenu: UIMenu?
     
     weak var delegate: FilterMenuDelegate?
     
     private func createSortingActions() -> [UIAction] {
-        var sortingActions: [UIAction] = []
+        var sortAct: [UIAction] = []
         SortingOption.allCases.forEach { sortingOption in
-            sortingActions.append(UIAction(title: sortingOption.sortionOptionTitle) { _ in
+            sortAct.append(UIAction(title: sortingOption.sortionOptionTitle) { _ in
                 self.delegate?.sortingIsChosen(type: sortingOption)
             })
         }
-        sortingActions.first(where: { $0.title == SortingOption.title.sortionOptionTitle})?.state = .on
-        return sortingActions
+        sortAct.first(where: { $0.title == SortingOption.title.sortionOptionTitle})?.state = .on
+        return sortAct
     }
     
     private func createFilteringActions() -> [UIAction] {
@@ -86,6 +86,6 @@ class FilterMenu: UIMenu {
         sortByOptionElement = UIMenu(title: "", options: [.displayInline,.singleSelection], children: createSortingActions())
         orderByOption = UIMenu(title: "", options: [.displayInline,.singleSelection], children: createFilteringActions())
         guard let first = sortByOptionElement, let second = orderByOption else { return }
-        fullMenu = UIMenu(title: "Sort By", children: [first,second])
+        fulleMenu = UIMenu(title: "Sort By", children: [first,second])
     }
 }

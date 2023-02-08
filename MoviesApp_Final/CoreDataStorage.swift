@@ -10,7 +10,6 @@ import CoreData
 
 class CoreDataStorage {
     static let shared = CoreDataStorage()
-    var favoritedMoviesTitles: [String] = []
     
     private init() {}
     

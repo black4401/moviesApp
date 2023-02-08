@@ -65,6 +65,9 @@ class FavoritesTableViewController: UITableViewController, FilterMenuDelegate {
             detailsVC.title = movie.title
         }
     }
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "showDetails", sender: tableView.cellForRow(at: indexPath))
+    }
 }
 
 extension FavoritesTableViewController {
@@ -93,7 +96,6 @@ extension FavoritesTableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let movie = fetchedResultsController.object(at: indexPath)
-            
             dataManager.deleteFavourite(movie: movie)
         }
     }
@@ -140,19 +142,19 @@ extension FavoritesTableViewController: NSFetchedResultsControllerDelegate  {
 
 extension FavoritesTableViewController: CoreDataManagerDelegate {
     func handleSuccessfulSave() {
-//        let alert = UIAlertController(title: nil, message: "Successfully deleted.", preferredStyle: .alert)
-//        present(alert, animated: true)
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-//            self.dismiss(animated: true)
-//        }
+        let alert = UIAlertController(title: nil, message: "Movie added to favorites", preferredStyle: .alert)
+        present(alert, animated: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.dismiss(animated: true)
+        }
     }
-    
-    func handleUnsuccessfulSave(title: String) {
-//        let alert = UIAlertController(title: nil, message: "\(title) could not be deleted.", preferredStyle: .alert)
-//        present(alert, animated: true)
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-//            self.dismiss(animated: true)
-//        }
+
+    func handleUnsuccessfulSave(title: String, error: Error) {
+        let alert = UIAlertController(title: nil, message: "\(title) is already in favorites.", preferredStyle: .alert)
+        present(alert, animated: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.dismiss(animated: true)
+        }
     }
 }
 
@@ -161,7 +163,7 @@ extension FavoritesTableViewController {
     private func createSortButton() -> UIButton {
         let sortButton = UIButton()
         sortButton.showsMenuAsPrimaryAction = true
-        sortButton.menu = filterMenu.fullMenu
+        sortButton.menu = filterMenu.fulleMenu
         sortButton.addAction(sortButtonAction(), for: .menuActionTriggered)
         sortButton.setImage(UIImage(systemName: "arrow.up.arrow.down"), for: .normal)
         return sortButton
@@ -170,6 +172,8 @@ extension FavoritesTableViewController {
     private func sortButtonAction() -> UIAction {
         return UIAction(title: "") { _ in
         }
+    }
+    func didDismissMenu() {
     }
     
     private func reloadSorted(sort: NSSortDescriptor) {
@@ -187,7 +191,7 @@ extension FavoritesTableViewController {
     }
     
     func filteringIsChosen(type: FilterOption) {
-        selectedOptions.1 = type.isAscending
+        selectedOptions.1 = type.state
     }
 }
 

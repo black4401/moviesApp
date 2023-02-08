@@ -27,17 +27,14 @@ class MovieTableViewCell: UITableViewCell {
         }
     }
     
-    func loadImage(from url: URL, completion: @escaping (Bool) -> Void) {
+    func loadImage(from url: URL, completion: ((Bool) -> Void)? = nil) {
         movieImageView?.loadImage(from: url) { isSuccessful in
-            completion(isSuccessful)
+            completion?(isSuccessful)
         }
     }
     
-    func getImage() -> UIImage? {
-        if let image = movieImageView?.image {
-            return image
-        }
-       return nil
+    func getImage() -> UIImage {
+        (movieImageView?.image)!
     }
     
     override func prepareForReuse() {

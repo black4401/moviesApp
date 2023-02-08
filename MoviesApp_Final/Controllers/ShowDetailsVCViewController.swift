@@ -15,8 +15,11 @@ class ShowDetailsVCViewController: UIViewController {
     
     @IBOutlet weak var textLabel: UILabel!
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
         if textLabel != nil {
             textLabel.text = textContent
         }
