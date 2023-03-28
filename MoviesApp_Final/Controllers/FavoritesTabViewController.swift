@@ -65,12 +65,12 @@ class FavoritesTableViewController: UITableViewController, FilterMenuDelegate {
             detailsVC.title = movie.title
         }
     }
-#warning("extract hard coded values in constants")
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "showDetails", sender: tableView.cellForRow(at: indexPath))
+        performSegue(withIdentifier: SegueConstants.showDetail, sender: tableView.cellForRow(at: indexPath))
     }
 }
-#warning("Is there a reason that you are choosing the number 0 here if the datasource is nil?")
+
 extension FavoritesTableViewController {
     override func numberOfSections(in tableView: UITableView) -> Int {
         fetchedResultsController.sections?.count ?? 0
@@ -80,9 +80,9 @@ extension FavoritesTableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
-#warning("extract hard coded values in constants")
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MainCell",
+        let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifierConstants.mainCell,
                                                  for: indexPath) as! MovieTableViewCell
         
         // Fetch the data for the row.
@@ -99,20 +99,6 @@ extension FavoritesTableViewController {
             let movie = fetchedResultsController.object(at: indexPath)
             dataManager.deleteFavourite(movie: movie)
         }
-    }
-#warning("Is there a reason that you are choosing the number 10 here if the datasource is nil?")
-    override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let viewDetailsAction = UIContextualAction(style: .normal, title: "") { (action, view, completion) in
-            self.performSegue(withIdentifier: "showDetails", sender: tableView.cellForRow(at: indexPath))
-            completion(true)
-        }
-        
-        viewDetailsAction.image = UIImage(systemName: "arrowshape.right")
-        viewDetailsAction.backgroundColor = .systemBlue
-        
-        let config = UISwipeActionsConfiguration(actions: [viewDetailsAction])
-        
-        return config
     }
 }
 
@@ -138,24 +124,6 @@ extension FavoritesTableViewController: NSFetchedResultsControllerDelegate  {
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
-    }
-}
-
-extension FavoritesTableViewController: CoreDataManagerDelegate {
-    func handleSuccessfulSave() {
-        let alert = UIAlertController(title: nil, message: "Movie added to favorites", preferredStyle: .alert)
-        present(alert, animated: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.dismiss(animated: true)
-        }
-    }
-
-    func handleUnsuccessfulSave(title: String, error: Error) {
-        let alert = UIAlertController(title: nil, message: "\(title) is already in favorites.", preferredStyle: .alert)
-        present(alert, animated: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.dismiss(animated: true)
-        }
     }
 }
 

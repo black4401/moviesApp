@@ -25,4 +25,12 @@ extension MoviesTableViewController: CoreDataManagerDelegate {
             self.dismiss(animated: true)
         }
     }
+    
+    func handleSuccessfulRemoveFromFavorite() {
+        let alert = UIAlertController(title: nil, message: "Movie removed from favorites", preferredStyle: .alert)
+        present(alert, animated: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.dismiss(animated: true)
+        }
+    }
 }

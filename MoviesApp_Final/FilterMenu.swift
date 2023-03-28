@@ -12,20 +12,13 @@ enum SortingOption: String, CaseIterable {
     case title
     case voteAverage
     case releaseDate
-    #warning("There is an easy way to optimize this computed var by returning the rawValue of self")
+    
     var sortionOptionTitle: String {
-        switch self {
-        case .title:
-            return "Title"
-        case .voteAverage:
-            return "Rating"
-        case .releaseDate:
-            return "Date"
-        }
+        return self.rawValue.capitalized
     }
 }
 
-enum FilterOption: CaseIterable {
+enum FilterOption: String, CaseIterable {
     case ascending
     case descending
     
@@ -37,14 +30,9 @@ enum FilterOption: CaseIterable {
             return false
         }
     }
-#warning("There is an easy way to optimize this computed var by returning the rawValue of self")
+    
     var filterOptionTitle: String {
-        switch self {
-        case .ascending:
-            return "Ascending"
-        case .descending:
-            return "Descending"
-        }
+        return self.rawValue.capitalized
     }
 }
 

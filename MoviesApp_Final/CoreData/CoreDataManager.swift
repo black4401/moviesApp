@@ -22,6 +22,7 @@ enum CoreDataManagerError: Error {
 protocol CoreDataManagerDelegate: AnyObject {
     func handleSuccessfulSave()
     func handleUnsuccessfulSave(title: String, error: Error)
+    func handleSuccessfulRemoveFromFavorite()
 }
 
 class CoreDataManager {
@@ -74,7 +75,7 @@ class CoreDataManager {
         context.delete(movie)
         do {
             try context.save()
-            delegate?.handleSuccessfulSave()
+            delegate?.handleSuccessfulRemoveFromFavorite()
         } catch {
             delegate?.handleUnsuccessfulSave(title: movie.title!, error: CoreDataManagerError.alreadySaved)
         }
