@@ -8,7 +8,7 @@
 import Foundation
 
 class APICaller {
-    
+    #warning("Please review the vars here for their access modifiers")
     let apiKey = "b9154cb727a3792889b9d7c73195411f"
     var pageNumber = 1
     

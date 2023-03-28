@@ -12,7 +12,7 @@ enum SortingOption: String, CaseIterable {
     case title
     case voteAverage
     case releaseDate
-    
+    #warning("There is an easy way to optimize this computed var by returning the rawValue of self")
     var sortionOptionTitle: String {
         switch self {
         case .title:
@@ -37,7 +37,7 @@ enum FilterOption: CaseIterable {
             return false
         }
     }
-    
+#warning("There is an easy way to optimize this computed var by returning the rawValue of self")
     var filterOptionTitle: String {
         switch self {
         case .ascending:

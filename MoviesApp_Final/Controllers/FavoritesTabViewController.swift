@@ -65,11 +65,12 @@ class FavoritesTableViewController: UITableViewController, FilterMenuDelegate {
             detailsVC.title = movie.title
         }
     }
+#warning("extract hard coded values in constants")
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "showDetails", sender: tableView.cellForRow(at: indexPath))
     }
 }
-
+#warning("Is there a reason that you are choosing the number 0 here if the datasource is nil?")
 extension FavoritesTableViewController {
     override func numberOfSections(in tableView: UITableView) -> Int {
         fetchedResultsController.sections?.count ?? 0
@@ -79,7 +80,7 @@ extension FavoritesTableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
-    
+#warning("extract hard coded values in constants")
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "MainCell",
                                                  for: indexPath) as! MovieTableViewCell
@@ -99,7 +100,7 @@ extension FavoritesTableViewController {
             dataManager.deleteFavourite(movie: movie)
         }
     }
-    
+#warning("Is there a reason that you are choosing the number 10 here if the datasource is nil?")
     override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let viewDetailsAction = UIContextualAction(style: .normal, title: "") { (action, view, completion) in
             self.performSegue(withIdentifier: "showDetails", sender: tableView.cellForRow(at: indexPath))

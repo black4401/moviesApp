@@ -21,7 +21,7 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
             }
         }
     }
-    
+    #warning("Please group override funcs together")
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Home"
@@ -44,7 +44,7 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
             detailsVC.configure(text: dataSource?[indexPath.row].overview)
         }
     }
-    
+    #warning("extract hard coded values in constants")
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "showDetails", sender: tableView.cellForRow(at: indexPath))
     }
@@ -62,13 +62,13 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
         super.viewWillAppear(animated)
         tableView.reloadData()
     }
-    
+#warning("Is there a reason that you are choosing the number 10 here if the datasource is nil?")
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource?.count ?? 10
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+#warning("extract hard coded values in constants")
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "MainCell", for: indexPath) as? MovieTableViewCell else {
             return UITableViewCell()
         }
@@ -86,17 +86,18 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
         updateStarButton(for: cell)
         return cell
     }
-    
+    #warning("What is the logic behind count - 10?")
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         guard let count = dataSource?.count else { return }
         if indexPath.row == count - 10 {
             fetchNewMovies()
+            loadMovies()
         }
     }
 }
 
 extension MoviesTableViewController {
-    
+#warning("extract hard coded values in constants")
     override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let viewDetailsAction = UIContextualAction(style: .normal, title: "") { (action, view, completion) in
             self.performSegue(withIdentifier: "showDetails", sender: tableView.cellForRow(at: indexPath))
@@ -140,7 +141,7 @@ extension MoviesTableViewController {
         return UISwipeActionsConfiguration(actions: [favouriteAction])
     }
 }
-
+#warning("Consider grouping private methods in a private extension")
 extension MoviesTableViewController {
     
     private func fetchNewMovies() {
@@ -168,7 +169,7 @@ extension MoviesTableViewController {
     }
 }
 
-
+#warning("Consider grouping private methods in a private extension")
 extension MoviesTableViewController {
     
     private func getLoadedImageFromCell(indexPath: IndexPath) -> UIImage? {
