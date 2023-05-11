@@ -21,10 +21,18 @@ class MovieTableViewCell: UITableViewCell {
     var movieModel: MovieModel? {
         didSet {
             titleLabel?.text = (movieModel!.title)
-            dateLabel?.text = (movieModel!.releaseDate)
-            ratingLabel?.text = "  \(String(format: "%.1f", (self.movieModel!.voteAverage)))"
+            dateLabel?.text = formatDate(dateText: movieModel!.releaseDate)
+            ratingLabel?.text = "\(String(format: "%.1f", (self.movieModel!.voteAverage)))"
             movieImageView?.image = movieModel?.image
         }
+    }
+    
+    func formatDate(dateText: String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy"
+        
+        let date = Date(from: dateText, format: "yyyy-MM-dd")
+        return dateFormatter.string(from: date!)
     }
     
     func loadImage(from url: URL, completion: ((Bool) -> Void)? = nil) {
