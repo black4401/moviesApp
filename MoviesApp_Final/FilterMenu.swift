@@ -13,8 +13,19 @@ enum SortingOption: String, CaseIterable {
     case voteAverage
     case releaseDate
     
-    var sortionOptionTitle: String {
-        return self.rawValue.capitalized
+    var sortionOption: String {
+        return self.rawValue
+    }
+    
+    var displayName: String {
+        switch self {
+            case .title:
+                return self.rawValue.capitalized
+            case .voteAverage:
+                return "Rating"
+            case .releaseDate:
+                return "Date"
+        }
     }
 }
 
@@ -51,11 +62,11 @@ class FilterMenu: UIMenu {
     private func createSortingActions() -> [UIAction] {
         var sortAct: [UIAction] = []
         SortingOption.allCases.forEach { sortingOption in
-            sortAct.append(UIAction(title: sortingOption.sortionOptionTitle) { _ in
+            sortAct.append(UIAction(title: sortingOption.displayName) { _ in
                 self.delegate?.sortingIsChosen(type: sortingOption)
             })
         }
-        sortAct.first(where: { $0.title == SortingOption.title.sortionOptionTitle})?.state = .on
+        sortAct.first(where: { $0.title == SortingOption.title.sortionOption})?.state = .on
         return sortAct
     }
     
