@@ -10,6 +10,8 @@ import CoreData
 
 class MoviesTableViewController: UITableViewController, NSFetchedResultsControllerDelegate {
     
+    // MARK: - Properties
+    
     private var apiCaller = APICaller()
     private var dataManager = CoreDataManager()
     private var isLoading = false
@@ -21,6 +23,8 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
             }
         }
     }
+    
+    // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,6 +40,8 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
         }
     }
     
+    // MARK: - Prepare for Segue
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let cell = sender as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell),
@@ -44,6 +50,8 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
             detailsVC.configure(text: dataSource?[indexPath.row].overview)
         }
     }
+    
+    // MARK: - Tableview Delegate Methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: SegueConstants.showDetail, sender: tableView.cellForRow(at: indexPath))
@@ -59,7 +67,7 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
+        
         guard let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifierConstants.mainCell, for: indexPath) as? MovieTableViewCell else {
             return UITableViewCell()
         }
@@ -85,6 +93,47 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
             loadMovies()
         }
     }
+}
+
+// MARK: - Swipe Actions
+
+extension MoviesTableViewController {
+    
+    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        
+        let cell = tableView.cellForRow(at: indexPath) as! MovieTableViewCell
+        let id = cell.movieModel!.id
+        
+        if dataManager.isMovieAlreadySaved(with: id){
+            let deleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] (action, view, completion) in
+                self?.dataManager.deleteFavorite(with: id)
+                self!.updateStarButton(for: tableView.cellForRow(at: indexPath) as! MovieTableViewCell)
+                completion(true)
+            }
+            
+            deleteAction.image = UIImage(systemName: "star")
+            
+            return UISwipeActionsConfiguration(actions: [deleteAction])
+        }
+        
+        let favouriteAction = UIContextualAction(style: .normal, title: "") { [weak self] (action, view, completion) in
+            let image = self?.getLoadedImageFromCell(indexPath: indexPath)
+            let movie = self?.dataSource?[indexPath.row]
+            self?.dataManager.saveFavourite(movieToSave: movie!, image: image)
+            self?.updateStarButton(for: tableView.cellForRow(at: indexPath) as! MovieTableViewCell)
+            completion(true)
+        }
+        
+        favouriteAction.image = UIImage(systemName: "star")
+        favouriteAction.backgroundColor = .systemBlue
+        
+        return UISwipeActionsConfiguration(actions: [favouriteAction])
+    }
+}
+
+// MARK: - Private Methods
+
+private extension MoviesTableViewController {
     
     func loadMovies() {
         apiCaller.getTrendingMovies(page: apiCaller.pageNumber) { [weak self] movies in
@@ -94,42 +143,6 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
             }
         }
     }
-}
-
-extension MoviesTableViewController {
-
-    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        
-        let cell = tableView.cellForRow(at: indexPath) as! MovieTableViewCell
-        let title = cell.movieModel!.title
-        
-        if dataManager.isMovieAlreadySaved(with: title){
-            let deleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] (action, view, completion) in
-                self?.dataManager.deleteFavorite(with: title)
-                self!.updateStarButton(for: tableView.cellForRow(at: indexPath) as! MovieTableViewCell)
-                completion(true)
-            }
-
-            deleteAction.image = UIImage(systemName: "star")
-
-            return UISwipeActionsConfiguration(actions: [deleteAction])
-        }
-
-        let favouriteAction = UIContextualAction(style: .normal, title: "") { [weak self] (action, view, completion) in
-            let image = self?.getLoadedImageFromCell(indexPath: indexPath)
-            self?.dataManager.saveFavourite(movieToSave: (self?.dataSource?[indexPath.row])!, image: image)
-            self?.updateStarButton(for: tableView.cellForRow(at: indexPath) as! MovieTableViewCell)
-            completion(true)
-        }
-
-        favouriteAction.image = UIImage(systemName: "star")
-        favouriteAction.backgroundColor = .systemBlue
-
-        return UISwipeActionsConfiguration(actions: [favouriteAction])
-    }
-}
-
-private extension MoviesTableViewController {
     
     func fetchNewMovies() {
         guard !isLoading else { return }
@@ -163,7 +176,8 @@ private extension MoviesTableViewController {
     }
     
     func updateStarButton(for cell: MovieTableViewCell) {
-        if dataManager.isMovieAlreadySaved(with: cell.movieModel!.title) {
+        let id = cell.movieModel!.id
+        if dataManager.isMovieAlreadySaved(with: id) {
             cell.starButton?.isHidden = false
         } else {
             cell.starButton?.isHidden = true

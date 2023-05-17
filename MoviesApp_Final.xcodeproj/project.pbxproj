@@ -31,6 +31,7 @@
 		BB18840029913A6200AC7BDA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BB1883FF29913A6200AC7BDA /* Main.storyboard */; };
 		BBA0417129D3196200E39A06 /* SegueConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA0417029D3196200E39A06 /* SegueConstants.swift */; };
 		BBA0417329D3199D00E39A06 /* CellIdentifierConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA0417229D3199D00E39A06 /* CellIdentifierConstants.swift */; };
+		BBE0CA0D2A0CDA06005B4FCC /* Date+Init.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBE0CA0C2A0CDA06005B4FCC /* Date+Init.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +61,7 @@
 		BB1883FF29913A6200AC7BDA /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		BBA0417029D3196200E39A06 /* SegueConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegueConstants.swift; sourceTree = "<group>"; };
 		BBA0417229D3199D00E39A06 /* CellIdentifierConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellIdentifierConstants.swift; sourceTree = "<group>"; };
+		BBE0CA0C2A0CDA06005B4FCC /* Date+Init.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Init.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -133,6 +135,7 @@
 		BBA0417629D31B4C00E39A06 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				BBE0CA0C2A0CDA06005B4FCC /* Date+Init.swift */,
 				BB1883EB29913A4400AC7BDA /* Data+Image.swift */,
 				BB1883DA29913A4100AC7BDA /* MoviesTableVC+CoreDataDelegate.swift */,
 				BB1883D829913A4000AC7BDA /* String+Extension.swift */,
@@ -267,6 +270,7 @@
 				BB1883EC29913A4400AC7BDA /* String+Extension.swift in Sources */,
 				BB1883C42991395C00AC7BDA /* SceneDelegate.swift in Sources */,
 				BB1883FA29913A4400AC7BDA /* MovieDTO.swift in Sources */,
+				BBE0CA0D2A0CDA06005B4FCC /* Date+Init.swift in Sources */,
 				BB1883F529913A4400AC7BDA /* CoreDataStorage.swift in Sources */,
 				BB1883FD29913A4400AC7BDA /* MovieTableViewCell.swift in Sources */,
 			);

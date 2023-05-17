@@ -8,7 +8,9 @@
 import UIKit
 import CoreData
 
-class FavoritesTableViewController: UITableViewController, FilterMenuDelegate {
+class FavoritesTableViewController: UITableViewController {
+    
+    // MARK: - Properties
     
     private var dataManager = CoreDataManager()
     private var filterMenu = FilterMenu()
@@ -41,6 +43,8 @@ class FavoritesTableViewController: UITableViewController, FilterMenuDelegate {
         return resultsController
     }()
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Favorites"
@@ -55,6 +59,8 @@ class FavoritesTableViewController: UITableViewController, FilterMenuDelegate {
         super.viewWillAppear(animated)
         tableView.reloadData()
     }
+    
+    // MARK: - Prepare for Segue
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let cell = sender as? UITableViewCell,
@@ -71,6 +77,8 @@ class FavoritesTableViewController: UITableViewController, FilterMenuDelegate {
     }
 }
 
+// MARK: - TableView Delegate Methods
+
 extension FavoritesTableViewController {
     override func numberOfSections(in tableView: UITableView) -> Int {
         fetchedResultsController.sections?.count ?? 0
@@ -85,11 +93,9 @@ extension FavoritesTableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifierConstants.mainCell,
                                                  for: indexPath) as! MovieTableViewCell
         
-        // Fetch the data for the row.
         let movie = fetchedResultsController.object(at: indexPath)
         let movieModel = MovieModel(movie)
         
-        // Configure the cell’s contents with data from the fetched object.
         cell.movieModel = movieModel
         return cell
     }
@@ -97,10 +103,12 @@ extension FavoritesTableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let movie = fetchedResultsController.object(at: indexPath)
-            dataManager.deleteFavourite(movie: movie)
+            dataManager.deleteFavorite(with: Int(movie.id))
         }
     }
 }
+
+// MARK: - FetchedResultsController Delegate
 
 extension FavoritesTableViewController: NSFetchedResultsControllerDelegate  {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
@@ -127,7 +135,7 @@ extension FavoritesTableViewController: NSFetchedResultsControllerDelegate  {
     }
 }
 
-extension FavoritesTableViewController {
+extension FavoritesTableViewController: FilterMenuDelegate {
     
     private func createSortButton() -> UIButton {
         let sortButton = UIButton()
@@ -142,6 +150,7 @@ extension FavoritesTableViewController {
         return UIAction(title: "") { _ in
         }
     }
+    
     func didDismissMenu() {
     }
     
