@@ -15,8 +15,8 @@ class MovieTableViewCell: UITableViewCell {
     @IBOutlet private weak var ratingLabel: UILabel?
     
     @IBOutlet weak var starButton: UIButton?
-    @IBOutlet weak var infoButton: UIButton!
-    @IBOutlet weak var favoriteButton: UIButton!
+    @IBOutlet private weak var infoButton: UIButton!
+    @IBOutlet private weak var favoriteButton: UIButton!
     
     var movieModel: MovieModel? {
         didSet {
@@ -27,7 +27,12 @@ class MovieTableViewCell: UITableViewCell {
         }
     }
     
-    func formatDate(dateText: String) -> String {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        movieImageView?.image = nil
+    }
+    
+    private func formatDate(dateText: String) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd.MM.yyyy"
         
@@ -43,10 +48,5 @@ class MovieTableViewCell: UITableViewCell {
     
     func getImage() -> UIImage {
         (movieImageView?.image)!
-    }
-    
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        movieImageView?.image = nil
     }
 }
