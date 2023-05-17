@@ -67,7 +67,7 @@ class FavoritesTableViewController: UITableViewController {
            let indexPath = tableView.indexPath(for: cell),
            let detailsVC = segue.destination as? ShowDetailsVCViewController {
             let movie = fetchedResultsController.object(at: indexPath)
-            detailsVC.configure(text: movie.overview)
+            detailsVC.configure(text: movie.overview, image: movie.storedImage?.image)
             detailsVC.title = movie.title
         }
     }

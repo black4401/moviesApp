@@ -46,8 +46,12 @@ class MoviesTableViewController: UITableViewController, NSFetchedResultsControll
         if let cell = sender as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell),
            let detailsVC = segue.destination as? ShowDetailsVCViewController {
-            detailsVC.title = dataSource?[indexPath.row].title
-            detailsVC.configure(text: dataSource?[indexPath.row].overview)
+            guard let cellData = dataSource?[indexPath.row] else {
+                return
+            }
+            detailsVC.title = cellData.title
+            let url = apiCaller.fetchImageURL(posterPath: cellData.posterPath!)
+            detailsVC.configure(text: cellData.overview, url: url)
         }
     }
     
