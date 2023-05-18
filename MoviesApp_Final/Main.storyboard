@@ -206,10 +206,18 @@
         <scene sceneID="Zft-Mv-nK1">
             <objects>
                 <tableViewController id="8sb-Kl-cyi" customClass="FavoritesTableViewController" customModule="MoviesApp_Final" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="L7w-T8-I24">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" estimatedSectionHeaderHeight="-1" sectionFooterHeight="28" estimatedSectionFooterHeight="-1" id="L7w-T8-I24">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <searchBar key="tableFooterView" contentMode="redraw" barStyle="black" placeholder="search" id="rkk-Dt-hyR">
+                            <rect key="frame" x="0.0" y="249" width="393" height="44"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                            <color key="barTintColor" systemColor="tertiarySystemBackgroundColor"/>
+                            <textInputTraits key="textInputTraits"/>
+                            <connections>
+                                <outlet property="delegate" destination="8sb-Kl-cyi" id="N4X-B9-RJl"/>
+                            </connections>
+                        </searchBar>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="MainCell" rowHeight="171" id="XV9-ht-a1R" customClass="MovieTableViewCell" customModule="MoviesApp_Final" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="50" width="393" height="171"/>
@@ -286,6 +294,7 @@
                     </tableView>
                     <navigationItem key="navigationItem" id="MOh-Sk-YBg"/>
                     <connections>
+                        <outlet property="searchBar" destination="rkk-Dt-hyR" id="KyB-9k-MpM"/>
                         <segue destination="o77-fp-Znb" kind="show" identifier="showDetails" id="KCx-6R-3JG"/>
                     </connections>
                 </tableViewController>
@@ -305,6 +314,9 @@
             <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="tertiarySystemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
     </resources>

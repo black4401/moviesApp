@@ -55,7 +55,7 @@ protocol FilterMenuDelegate: AnyObject {
 class FilterMenu: UIMenu {
     var sortByOptionElement: UIMenuElement?
     var orderByOption: UIMenuElement?
-    var fulleMenu: UIMenu?
+    var fullMenu: UIMenu?
     
     weak var delegate: FilterMenuDelegate?
     
@@ -85,6 +85,6 @@ class FilterMenu: UIMenu {
         sortByOptionElement = UIMenu(title: "", options: [.displayInline,.singleSelection], children: createSortingActions())
         orderByOption = UIMenu(title: "", options: [.displayInline,.singleSelection], children: createFilteringActions())
         guard let first = sortByOptionElement, let second = orderByOption else { return }
-        fulleMenu = UIMenu(title: "Sort By", children: [first,second])
+        fullMenu = UIMenu(title: "Sort By", children: [first,second])
     }
 }

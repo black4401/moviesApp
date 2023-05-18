@@ -8,30 +8,30 @@
 import UIKit
 
 class ShowDetailsVCViewController: UIViewController {
-
+    
+    // MARK: - Properties
+    
     private var textContent: String?
     private var image: UIImage?
-    private var url: URL? {
-        didSet {
-            loadImage(from: url!) { completion in
-                if completion {
-                    self.setBackgroundImage(with: self.image)
-                }
-            }
-        }
-    }
+    private var url: URL?
+    private let imageLoader = ImageLoader()
+    
+    // MARK: - IBOutlets
     
     @IBOutlet weak var textView: UITextView!
+    
+    // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.tintColor = .black
+        
+        setBackgroundImage(with: image)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         if textView != nil {
             textView.text = textContent
-            setBackgroundImage(with: image)
         }
     }
     
@@ -43,7 +43,10 @@ class ShowDetailsVCViewController: UIViewController {
     func configure(text: String?, url: URL) {
         self.textContent = text
         self.url = url
+        self.loadImage(from: url)
     }
+    
+    // MARK: - Private Methods
     
     private func setBackgroundImage(with image: UIImage?) {
         let tabBarFrameHeight = tabBarController!.tabBar.frame.height
@@ -57,21 +60,13 @@ class ShowDetailsVCViewController: UIViewController {
         view.sendSubviewToBack(backgroundImageView)
     }
     
-    private func loadImage(from url: URL, completion: @escaping (Bool) -> Void) {
-        image = nil
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            
-            ImageLoader.fetchImage(from: url) { loadedImage in
-                guard let loadedImage else {
-                    completion(false)
-                    return
-                }
-                guard self?.url == url else { return }
-                DispatchQueue.main.async {
-                    self?.image = loadedImage
-                    completion(true)
-                }
-            }
+    private func loadImage(from url: URL?) {
+        guard let url = url else {
+            return
+        }
+        imageLoader.loadImageAsync(from: url) { [weak self] image in
+            self?.image = image
+            self?.setBackgroundImage(with: image)
         }
     }
 }

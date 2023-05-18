@@ -81,6 +81,8 @@ class CoreDataManager {
     }
 }
 
+// MARK: - Private Methods
+
 private extension CoreDataManager {
     func getObjectBy(id: Int) -> Movie? {
         
