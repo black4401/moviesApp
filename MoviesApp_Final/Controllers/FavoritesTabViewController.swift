@@ -10,10 +10,19 @@ import CoreData
 
 class FavoritesTableViewController: UITableViewController {
     
+    private func getMovie(at indexPath: IndexPath) -> Movie {
+        if let controller = filteredResultsController {
+            return controller.object(at: indexPath)
+        }
+        return fetchedResultsController.object(at: indexPath)
+    }
+    
     // MARK: - Properties
     
     private var dataManager = CoreDataManager()
     private var filterMenu = FilterMenu()
+    
+    private var filteredResultsController: NSFetchedResultsController<Movie>?
     
     private var selectedOptions: (String, Bool) = ("title", true) {
         didSet {
@@ -43,10 +52,18 @@ class FavoritesTableViewController: UITableViewController {
         return resultsController
     }()
     
+    @IBOutlet weak var searchBar: UISearchBar!
+    
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        searchBar.delegate = self
+        
+        tableView.tableHeaderView = searchBar
+        
         navigationItem.title = "Favorites"
         
         filterMenu.delegate = self
@@ -81,19 +98,23 @@ class FavoritesTableViewController: UITableViewController {
 
 extension FavoritesTableViewController {
     override func numberOfSections(in tableView: UITableView) -> Int {
-        fetchedResultsController.sections?.count ?? 0
+        if let controller = filteredResultsController {
+            return controller.sections?.count ?? 0
+        }
+        return fetchedResultsController.sections?.count ?? 0
     }
     
-    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        fetchedResultsController.sections?[section].numberOfObjects ?? 0
+        if let controller = filteredResultsController {
+            return controller.sections?[section].numberOfObjects ?? 0
+        }
+        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifierConstants.mainCell,
-                                                 for: indexPath) as! MovieTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifierConstants.mainCell, for: indexPath) as! MovieTableViewCell
         
-        let movie = fetchedResultsController.object(at: indexPath)
+        let movie = getMovie(at: indexPath)
         let movieModel = MovieModel(movie)
         
         cell.movieModel = movieModel
@@ -135,12 +156,14 @@ extension FavoritesTableViewController: NSFetchedResultsControllerDelegate  {
     }
 }
 
-extension FavoritesTableViewController: FilterMenuDelegate {
+// MARK: - Sort Button
+
+extension FavoritesTableViewController {
     
     private func createSortButton() -> UIButton {
         let sortButton = UIButton()
         sortButton.showsMenuAsPrimaryAction = true
-        sortButton.menu = filterMenu.fulleMenu
+        sortButton.menu = filterMenu.fullMenu
         sortButton.addAction(sortButtonAction(), for: .menuActionTriggered)
         sortButton.setImage(UIImage(systemName: "arrow.up.arrow.down"), for: .normal)
         return sortButton
@@ -149,9 +172,6 @@ extension FavoritesTableViewController: FilterMenuDelegate {
     private func sortButtonAction() -> UIAction {
         return UIAction(title: "") { _ in
         }
-    }
-    
-    func didDismissMenu() {
     }
     
     private func reloadSorted(sort: NSSortDescriptor) {
@@ -163,7 +183,11 @@ extension FavoritesTableViewController: FilterMenuDelegate {
         }
         tableView.reloadData()
     }
-    
+}
+
+// MARK: - FilterMenuDelegate
+
+extension FavoritesTableViewController: FilterMenuDelegate {
     func sortingIsChosen(type: SortingOption) {
         selectedOptions.0 = type.rawValue
     }
@@ -172,5 +196,40 @@ extension FavoritesTableViewController: FilterMenuDelegate {
         selectedOptions.1 = type.state
     }
 }
+
+extension FavoritesTableViewController: UISearchBarDelegate {
+    
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        let request: NSFetchRequest<Movie> = Movie.fetchRequest()
+        request.sortDescriptors = [
+            NSSortDescriptor(key: "title", ascending: true)
+        ]
+        
+        if !searchText.isEmpty {
+            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchText)
+            request.predicate = predicate
+        }
+        
+        let context = dataManager.persistentContainer.viewContext
+        filteredResultsController = NSFetchedResultsController(fetchRequest: request, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
+        
+        do {
+            try filteredResultsController?.performFetch()
+        } catch {
+            print("Could not perform fetch")
+        }
+        
+        tableView.reloadData()
+    }
+    
+    
+}
+
 
 
