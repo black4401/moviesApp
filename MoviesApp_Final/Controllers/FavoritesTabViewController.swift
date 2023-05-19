@@ -10,19 +10,11 @@ import CoreData
 
 class FavoritesTableViewController: UITableViewController {
     
-    private func getMovie(at indexPath: IndexPath) -> Movie {
-        if let controller = filteredResultsController {
-            return controller.object(at: indexPath)
-        }
-        return fetchedResultsController.object(at: indexPath)
-    }
-    
     // MARK: - Properties
     
     private var dataManager = CoreDataManager()
     private var filterMenu = FilterMenu()
-    
-    private var filteredResultsController: NSFetchedResultsController<Movie>?
+    private var searchBarText: String = ""
     
     private var selectedOptions: (String, Bool) = ("title", true) {
         didSet {
@@ -83,7 +75,8 @@ class FavoritesTableViewController: UITableViewController {
         if let cell = sender as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell),
            let detailsVC = segue.destination as? ShowDetailsVCViewController {
-            let movie = fetchedResultsController.object(at: indexPath)
+            
+            let movie = getMovie(at: indexPath)
             detailsVC.configure(text: movie.overview, image: movie.storedImage?.image)
             detailsVC.title = movie.title
         }
@@ -92,23 +85,23 @@ class FavoritesTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: SegueConstants.showDetail, sender: tableView.cellForRow(at: indexPath))
     }
+    
+    // MARK: - Private Methods
+    
+    private func getMovie(at indexPath: IndexPath) -> Movie {
+        return fetchedResultsController.object(at: indexPath)
+    }
 }
 
 // MARK: - TableView Delegate Methods
 
 extension FavoritesTableViewController {
     override func numberOfSections(in tableView: UITableView) -> Int {
-        if let controller = filteredResultsController {
-            return controller.sections?.count ?? 0
-        }
         return fetchedResultsController.sections?.count ?? 0
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if let controller = filteredResultsController {
-            return controller.sections?[section].numberOfObjects ?? 0
-        }
-        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
+        return fetchedResultsController.fetchedObjects?.count ?? 0
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -176,10 +169,18 @@ extension FavoritesTableViewController {
     
     private func reloadSorted(sort: NSSortDescriptor) {
         fetchedResultsController.fetchRequest.sortDescriptors = [sort]
+        
+        if !searchBarText.isEmpty {
+            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBarText)
+            fetchedResultsController.fetchRequest.predicate = predicate
+        } else {
+            fetchedResultsController.fetchRequest.predicate = nil
+        }
+        
         do {
             try fetchedResultsController.performFetch()
         } catch {
-            print("Couldnt perform fetch")
+            print("Could not perform fetch")
         }
         tableView.reloadData()
     }
@@ -199,36 +200,17 @@ extension FavoritesTableViewController: FilterMenuDelegate {
 
 extension FavoritesTableViewController: UISearchBarDelegate {
     
-    
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBarText = ""
         searchBar.text = ""
         searchBar.resignFirstResponder()
+        reloadSorted(sort: NSSortDescriptor(key: "title", ascending: true))
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        let request: NSFetchRequest<Movie> = Movie.fetchRequest()
-        request.sortDescriptors = [
-            NSSortDescriptor(key: "title", ascending: true)
-        ]
-        
-        if !searchText.isEmpty {
-            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchText)
-            request.predicate = predicate
-        }
-        
-        let context = dataManager.persistentContainer.viewContext
-        filteredResultsController = NSFetchedResultsController(fetchRequest: request, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
-        
-        do {
-            try filteredResultsController?.performFetch()
-        } catch {
-            print("Could not perform fetch")
-        }
-        
-        tableView.reloadData()
+        self.searchBarText = searchText
+        reloadSorted(sort: NSSortDescriptor(key: "title", ascending: true))
     }
-    
-    
 }
 
 
