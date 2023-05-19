@@ -9,6 +9,8 @@ import UIKit
 
 class MovieTableViewCell: UITableViewCell {
     
+    private lazy var dateFormatter = DateFormatter()
+    
     @IBOutlet private weak var movieImageView: MovieImageView?
     @IBOutlet private weak var titleLabel: UILabel?
     @IBOutlet private weak var dateLabel: UILabel?
@@ -33,7 +35,6 @@ class MovieTableViewCell: UITableViewCell {
     }
     
     private func formatDate(dateText: String) -> String {
-        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd.MM.yyyy"
         
         let date = Date(from: dateText, format: "yyyy-MM-dd")
