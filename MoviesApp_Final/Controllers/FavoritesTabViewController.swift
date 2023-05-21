@@ -52,9 +52,8 @@ class FavoritesTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        searchBar.delegate = self
-        
         tableView.tableHeaderView = searchBar
+        searchBar.delegate = self
         
         navigationItem.title = "Favorites"
         
