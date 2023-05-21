@@ -8,11 +8,10 @@
 import Foundation
 
 class APICaller {
-    #warning("Please review the vars here for their access modifiers")
-    let apiKey = "b9154cb727a3792889b9d7c73195411f"
+    private let apiKey = "b9154cb727a3792889b9d7c73195411f"
     var pageNumber = 1
     
-    func fetchMoviesURL(page: Int) -> URL {
+    private func fetchMoviesURL(page: Int) -> URL {
         var components = URLComponents()
         components.scheme = "https"
         components.host = "api.themoviedb.org"
@@ -34,7 +33,6 @@ class APICaller {
     }
     
     func getTrendingMovies(page: Int, success: @escaping ([MovieModel]) -> Void) {
-        
         pageNumber += 1
         let session = URLSession(configuration: .default)
         session.fetchData(for: fetchMoviesURL(page: page)) {(result: Result<Page, Error>) in
@@ -48,7 +46,6 @@ class APICaller {
                 case .failure(let error):
                     print(error)
             }
-            
         }
     }
 }

@@ -22,6 +22,7 @@ enum CoreDataManagerError: Error {
 protocol CoreDataManagerDelegate: AnyObject {
     func handleSuccessfulSave()
     func handleUnsuccessfulSave(title: String, error: Error)
+    func handleSuccessfulRemoveFromFavorite()
 }
 
 class CoreDataManager {
@@ -30,9 +31,11 @@ class CoreDataManager {
     
     var persistentContainer = CoreDataStorage.shared.persistentContainer
     
-    func isMovieAlreadySaved(with title: String) -> Bool {
+    // MARK: - Public Methods
+    
+    func isMovieAlreadySaved(with id: Int) -> Bool {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Movie")
-        fetchRequest.predicate = NSPredicate(format: "title = %@", title)
+        fetchRequest.predicate = NSPredicate(format: "id = %d", Int32(id))
         
         var entitiesCount = 0
         
@@ -49,11 +52,12 @@ class CoreDataManager {
     func saveFavourite(movieToSave: MovieModel, image: UIImage?) {
         let context = persistentContainer.viewContext
         
-        guard !isMovieAlreadySaved(with: movieToSave.title) else {
+        guard !isMovieAlreadySaved(with: movieToSave.id) else {
             delegate?.handleUnsuccessfulSave(title: movieToSave.title, error: CoreDataManagerError.alreadySaved)
             return
         }
         let movie = Movie(context: context)
+        movie.id = Int32(movieToSave.id)
         movie.title = movieToSave.title
         movie.overview = movieToSave.overview
         movie.voteAverage = movieToSave.voteAverage
@@ -69,25 +73,18 @@ class CoreDataManager {
         }
     }
     
-    func deleteFavourite(movie: Movie) {
-        let context = persistentContainer.viewContext
-        context.delete(movie)
-        do {
-            try context.save()
-            delegate?.handleSuccessfulSave()
-        } catch {
-            delegate?.handleUnsuccessfulSave(title: movie.title!, error: CoreDataManagerError.alreadySaved)
-        }
-    }
-    
-    func deleteFavorite(with title: String) {
-        guard let object = getObjectBy(title: title) else {
+    func deleteFavorite(with id: Int) {
+        guard let object = getObjectBy(id: id) else {
             return
         }
         deleteFavourite(movie: object)
     }
-    
-    func getObjectBy(title: String) -> Movie? {
+}
+
+// MARK: - Private Methods
+
+private extension CoreDataManager {
+    func getObjectBy(id: Int) -> Movie? {
         
         let request: NSFetchRequest<Movie> = Movie.fetchRequest()
         request.sortDescriptors = [
@@ -95,7 +92,7 @@ class CoreDataManager {
         ]
         
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Movie")
-        fetchRequest.predicate = NSPredicate(format: "title = %@", title)
+        fetchRequest.predicate = NSPredicate(format: "id = %d", id)
         
         var movies: [Movie]?
         
@@ -107,6 +104,17 @@ class CoreDataManager {
             print("error executing fetch request: \(error)")
         }
         
-        return movies?.first(where: {$0.title == title}) ?? nil
+        return movies?.first(where: {$0.id == id}) ?? nil
+    }
+    
+    func deleteFavourite(movie: Movie) {
+        let context = persistentContainer.viewContext
+        context.delete(movie)
+        do {
+            try context.save()
+            delegate?.handleSuccessfulRemoveFromFavorite()
+        } catch {
+            delegate?.handleUnsuccessfulSave(title: movie.title!, error: CoreDataManagerError.alreadySaved)
+        }
     }
 }

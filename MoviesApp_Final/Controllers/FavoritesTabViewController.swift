@@ -8,10 +8,13 @@
 import UIKit
 import CoreData
 
-class FavoritesTableViewController: UITableViewController, FilterMenuDelegate {
+class FavoritesTableViewController: UITableViewController {
+    
+    // MARK: - Properties
     
     private var dataManager = CoreDataManager()
     private var filterMenu = FilterMenu()
+    private var searchBarText: String = ""
     
     private var selectedOptions: (String, Bool) = ("title", true) {
         didSet {
@@ -41,8 +44,17 @@ class FavoritesTableViewController: UITableViewController, FilterMenuDelegate {
         return resultsController
     }()
     
+    @IBOutlet weak var searchBar: UISearchBar!
+    
+    
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        tableView.tableHeaderView = searchBar
+        searchBar.delegate = self
+        
         navigationItem.title = "Favorites"
         
         filterMenu.delegate = self
@@ -56,40 +68,47 @@ class FavoritesTableViewController: UITableViewController, FilterMenuDelegate {
         tableView.reloadData()
     }
     
+    // MARK: - Prepare for Segue
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let cell = sender as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell),
            let detailsVC = segue.destination as? ShowDetailsVCViewController {
-            let movie = fetchedResultsController.object(at: indexPath)
-            detailsVC.configure(text: movie.overview)
+            
+            let movie = getMovie(at: indexPath)
+            detailsVC.configure(text: movie.overview, image: movie.storedImage?.image)
             detailsVC.title = movie.title
         }
     }
-#warning("extract hard coded values in constants")
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "showDetails", sender: tableView.cellForRow(at: indexPath))
+        performSegue(withIdentifier: SegueConstants.showDetail, sender: tableView.cellForRow(at: indexPath))
+    }
+    
+    // MARK: - Private Methods
+    
+    private func getMovie(at indexPath: IndexPath) -> Movie {
+        return fetchedResultsController.object(at: indexPath)
     }
 }
-#warning("Is there a reason that you are choosing the number 0 here if the datasource is nil?")
+
+// MARK: - TableView Delegate Methods
+
 extension FavoritesTableViewController {
     override func numberOfSections(in tableView: UITableView) -> Int {
-        fetchedResultsController.sections?.count ?? 0
+        return fetchedResultsController.sections?.count ?? 0
     }
-    
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        fetchedResultsController.sections?[section].numberOfObjects ?? 0
+        return fetchedResultsController.fetchedObjects?.count ?? 0
     }
-#warning("extract hard coded values in constants")
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MainCell",
-                                                 for: indexPath) as! MovieTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifierConstants.mainCell, for: indexPath) as! MovieTableViewCell
         
-        // Fetch the data for the row.
-        let movie = fetchedResultsController.object(at: indexPath)
+        let movie = getMovie(at: indexPath)
         let movieModel = MovieModel(movie)
         
-        // Configure the cell’s contents with data from the fetched object.
         cell.movieModel = movieModel
         return cell
     }
@@ -97,24 +116,12 @@ extension FavoritesTableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let movie = fetchedResultsController.object(at: indexPath)
-            dataManager.deleteFavourite(movie: movie)
+            dataManager.deleteFavorite(with: Int(movie.id))
         }
-    }
-#warning("Is there a reason that you are choosing the number 10 here if the datasource is nil?")
-    override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let viewDetailsAction = UIContextualAction(style: .normal, title: "") { (action, view, completion) in
-            self.performSegue(withIdentifier: "showDetails", sender: tableView.cellForRow(at: indexPath))
-            completion(true)
-        }
-        
-        viewDetailsAction.image = UIImage(systemName: "arrowshape.right")
-        viewDetailsAction.backgroundColor = .systemBlue
-        
-        let config = UISwipeActionsConfiguration(actions: [viewDetailsAction])
-        
-        return config
     }
 }
+
+// MARK: - FetchedResultsController Delegate
 
 extension FavoritesTableViewController: NSFetchedResultsControllerDelegate  {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
@@ -141,30 +148,14 @@ extension FavoritesTableViewController: NSFetchedResultsControllerDelegate  {
     }
 }
 
-extension FavoritesTableViewController: CoreDataManagerDelegate {
-    func handleSuccessfulSave() {
-        let alert = UIAlertController(title: nil, message: "Movie added to favorites", preferredStyle: .alert)
-        present(alert, animated: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.dismiss(animated: true)
-        }
-    }
-
-    func handleUnsuccessfulSave(title: String, error: Error) {
-        let alert = UIAlertController(title: nil, message: "\(title) is already in favorites.", preferredStyle: .alert)
-        present(alert, animated: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.dismiss(animated: true)
-        }
-    }
-}
+// MARK: - Sort Button
 
 extension FavoritesTableViewController {
     
     private func createSortButton() -> UIButton {
         let sortButton = UIButton()
         sortButton.showsMenuAsPrimaryAction = true
-        sortButton.menu = filterMenu.fulleMenu
+        sortButton.menu = filterMenu.fullMenu
         sortButton.addAction(sortButtonAction(), for: .menuActionTriggered)
         sortButton.setImage(UIImage(systemName: "arrow.up.arrow.down"), for: .normal)
         return sortButton
@@ -174,19 +165,29 @@ extension FavoritesTableViewController {
         return UIAction(title: "") { _ in
         }
     }
-    func didDismissMenu() {
-    }
     
     private func reloadSorted(sort: NSSortDescriptor) {
         fetchedResultsController.fetchRequest.sortDescriptors = [sort]
+        
+        if !searchBarText.isEmpty {
+            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBarText)
+            fetchedResultsController.fetchRequest.predicate = predicate
+        } else {
+            fetchedResultsController.fetchRequest.predicate = nil
+        }
+        
         do {
             try fetchedResultsController.performFetch()
         } catch {
-            print("Couldnt perform fetch")
+            print("Could not perform fetch")
         }
         tableView.reloadData()
     }
-    
+}
+
+// MARK: - FilterMenuDelegate
+
+extension FavoritesTableViewController: FilterMenuDelegate {
     func sortingIsChosen(type: SortingOption) {
         selectedOptions.0 = type.rawValue
     }
@@ -195,5 +196,21 @@ extension FavoritesTableViewController {
         selectedOptions.1 = type.state
     }
 }
+
+extension FavoritesTableViewController: UISearchBarDelegate {
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBarText = ""
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        reloadSorted(sort: NSSortDescriptor(key: "title", ascending: true))
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        self.searchBarText = searchText
+        reloadSorted(sort: NSSortDescriptor(key: "title", ascending: true))
+    }
+}
+
 
 
